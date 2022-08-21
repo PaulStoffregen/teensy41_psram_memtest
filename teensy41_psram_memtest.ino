@@ -116,12 +116,10 @@ bool check_lfsr_pattern(uint32_t seed)
 	for (p = memory_begin; p < memory_end; p++) {
 		*p = reg;
 		for (int i=0; i < 3; i++) {
-			if (reg & 1) {
-				reg >>= 1;
-				reg ^= 0x7A5BC2E3;
-			} else {
-				reg >>= 1;
-			}
+			// https://en.wikipedia.org/wiki/Xorshift
+			reg ^= reg << 13;
+			reg ^= reg >> 17;
+			reg ^= reg << 5;
 		}
 	}
 	arm_dcache_flush_delete((void *)memory_begin,
@@ -132,12 +130,9 @@ bool check_lfsr_pattern(uint32_t seed)
 		if (actual != reg) return fail_message(p, actual, reg);
 		//Serial.printf(" reg=%08X\n", reg);
 		for (int i=0; i < 3; i++) {
-			if (reg & 1) {
-				reg >>= 1;
-				reg ^= 0x7A5BC2E3;
-			} else {
-				reg >>= 1;
-			}
+			reg ^= reg << 13;
+			reg ^= reg >> 17;
+			reg ^= reg << 5;
 		}
 	}
 	return true;
